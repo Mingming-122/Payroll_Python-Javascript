@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payroll System</title>
+    <title>PH Payroll & Tax System</title>
     <!-- <link rel="stylesheet" href="payrollSystem.css"> -->
 </head>
 
@@ -12,7 +12,7 @@
 <!-- __ App Header __ -->
 
     <header class="app-header">
-        <h1>Payroll System</h1>
+        <h1>Philippine Payroll & Tax Computation System</h1>
     </header>
 
     <div class = "badge_row">
@@ -24,6 +24,58 @@
     </div>
 
     <!-- INPUT CARD -->
+    <div class="card" id="input_section">
+        <div class="section_title"> Employee Information </div>
 
+        <!-- FORM GROUPS -->
+        <div class="form-grid">
+            <div class="form_group">
+                <label for="empName">Employee's Full Name:</label>
+                <input type="text" id="empName" name="empName" placeholder="e.g., Yasmien Mingo" required/>
+            </div>
+
+            <div class="form_group_full">
+                <label>Employee Type:</label>
+                <div class="type-toggle">
+                    <input type="radio" name="empType" id="typePrivate" value="private" checked />
+                    <label for="typePrivate">🏢 Private (SSS)</label>
+                    <input type="radio" name="empType" id="typeGov" value="government" />
+                    <label for="typeGov">🏛 Government (GSIS)</label>
+                </div>
+            </div>
+
+            <div class="form_group">
+                <label for="empSalary">Monthly Salary (₱):</label>
+                <input type="number" id="empSalary" name="empSalary" placeholder="e.g., 25000" required/>
+            </div>
+
+            <div class="form_group">
+                <label for="empDays">Working Days in Month:</label>
+                <input type="number" id="empDays" name="empDays" placeholder="e.g., 22" required/>
+            </div>
+
+            <div class="form_group">
+                <label for="empHours">Working Hours per Day:</label>
+                <input type="number" id="empHours" name="empHours" placeholder="e.g., 8" required/>
+            </div>
+
+            <div class="form_group">
+                <label for="empOvertime">Overtime Hours:</label>
+                <input type="number" id="empOvertime" name="empOvertime" placeholder="e.g., 5"/>
+            </div>
+
+            <div class="form_group">
+                <label for="empAllowances">Allowances (₱):</label>
+                <input type="number" id="empAllowances" name="empAllowances" placeholder="e.g., 1000"/>
+            </div>
+
+            <div class="form_group">
+                <label for="empDeductions">Deductions (₱):</label>
+                <input type="number" id="empDeductions" name="empDeductions" placeholder="e.g., 500"/>
+            </div>
+
+
+        </div>
+    </div>
 </body>
 </html>
