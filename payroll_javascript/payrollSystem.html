@@ -44,38 +44,172 @@
                 </div>
             </div>
 
-            <div class="form_group">
-                <label for="empSalary">Monthly Salary (₱):</label>
-                <input type="number" id="empSalary" name="empSalary" placeholder="e.g., 25000" required/>
+            <div class="form-group">
+                <label for="basicSalary">Basic Monthly Salary</label>
+                <div class="php-prefix">
+                    <span>PHP</span>
+                    <input type="number" id="basicSalary" placeholder="0.00" min="0" step="0.01" />
+                </div>
             </div>
 
-            <div class="form_group">
-                <label for="empDays">Working Days in Month:</label>
-                <input type="number" id="empDays" name="empDays" placeholder="e.g., 22" required/>
+            <div class="form-group">
+                <label for="allowances">Non-Taxable Allowances</label>
+                <div class="php-prefix">
+                    <span>PHP</span>
+                    <input type="number" id="allowances" placeholder="0.00" min="0" step="0.01" value="0" />
+                </div>
             </div>
+        </div>
 
-            <div class="form_group">
-                <label for="empHours">Working Hours per Day:</label>
-                <input type="number" id="empHours" name="empHours" placeholder="e.g., 8" required/>
-            </div>
-
-            <div class="form_group">
-                <label for="empOvertime">Overtime Hours:</label>
-                <input type="number" id="empOvertime" name="empOvertime" placeholder="e.g., 5"/>
-            </div>
-
-            <div class="form_group">
-                <label for="empAllowances">Allowances (₱):</label>
-                <input type="number" id="empAllowances" name="empAllowances" placeholder="e.g., 1000"/>
-            </div>
-
-            <div class="form_group">
-                <label for="empDeductions">Deductions (₱):</label>
-                <input type="number" id="empDeductions" name="empDeductions" placeholder="e.g., 500"/>
-            </div>
-
-
+        <div class="btn-row">
+            <button class="btn btn-secondary" onclick="resetForm()">⟳ Reset</button>
+            <button class="btn btn-primary" onclick="computePayroll()">⚡ Compute Payroll</button>
         </div>
     </div>
+
+    <!-- Result Card -->
+    <div class="card" id="result_section">
+        <div class="section-title">📋 Summary</div>
+        <div class="summary-grid" id="summaryTiles"></div>
+
+        <div class="section-title">Pay Slip</div>
+        <div class="payslip-header">
+            <div class="emp-info">
+                <h2 id="rsName">—</h2>
+                <span class="type-chip" id="rsType">—</span>
+            </div>
+            <div class="gross-box">
+                <div class="label">Gross Pay</div>
+                <div class="amount" id="rsGross">—</div>
+            </div>
+        </div>
+
+        <table class="payslip-table">
+            <tbody id="payslipBody"></tbody>
+        </table>
+
+        <div class="net-pay-banner">
+            <div>
+                <div class="label">Net Pay (Take-Home Pay)</div>
+                <div style="font-size:.75rem;opacity:.6;">After all deductions</div>
+            </div>
+
+            <div class="value" id="rsNetPay">—</div>
+        </div>
+
+        <div class="btn-row" style="margin-top:20px;">
+            <button class="btn btn-secondary" onclick="printPayslip()">🖨 Print</button>
+            <button class="btn btn-primary" onclick="newComputation()">+ New Computation</button>
+        </div>
+    </div>
+
+    <div class="card" id="annual-section" style="display:none;">
+        <div class="section-title">📅 Annualized Summary (12 Months)</div>
+        <table class="annual-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Monthly</th>
+                    <th>Annual (×12)</th>
+                </tr>
+            </thead>
+            <tbody id="annualBody"></tbody>
+            <tfoot id="annualFoot"></tfoot>
+        </table>
+    </div>
+
+    <footer class="footer">
+        Philippine Payroll &amp; Tax System &nbsp;·&nbsp; TRAIN Law | SSS 2025 (Circ. 2024-006) | PhilHealth 5% | Pag-IBIG Circ. 460 | GSIS<br/>
+        For reference only. Consult a licensed accountant for official tax computations.
+    </footer>
+
+    <!-- ══════════════════════════════════════════════════════════════
+        JAVASCRIPT — PROCEDURAL LOGIC (mirrors Python implementation)
+        ══════════════════════════════════════════════════════════════ -->
+    <script>
+    "use strict";
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        //  CONSTANTS & RATE TABLES
+        // ─────────────────────────────────────────────────────────────────────────────
+
+
+        /** SSS Monthly Salary Credit (MSC) Table 2025 — [minSalary, maxSalary, msc] 
+        <!-- SSS Circular No. 2024-006 | Rate: 5% EE | MSC range ₱5,000–₱35,000 **/  
+        
+        const SSS_table = [  
+        [0,      5249.99,  5000], // below 5,250 (range of contribution), Minimum MSC ₱5,000
+        [5250,   5749.99,  5500],
+        [5750,   6249.99,  6000],
+        [6250,   6749.99,  6500],
+        [6750,   7249.99,  7000],
+        [7250,   7749.99,  7500],
+        [7750,   8249.99,  8000],
+        [8250,   8749.99,  8500],
+        [8750,   9249.99,  9000],
+        [9250,   9749.99,  9500],
+        [9750,  10249.99, 10000],
+        [10250, 10749.99, 10500],
+        [10750, 11249.99, 11000],
+        [11250, 11749.99, 11500],
+        [11750, 12249.99, 12000],
+        [12250, 12749.99, 12500],
+        [12750, 13249.99, 13000],
+        [13250, 13749.99, 13500],
+        [13750, 14249.99, 14000],
+        [14250, 14749.99, 14500],
+        [14750, 15249.99, 15000],
+        [15250, 15749.99, 15500],
+        [15750, 16249.99, 16000],
+        [16250, 16749.99, 16500],
+        [16750, 17249.99, 17000],
+        [17250, 17749.99, 17500],
+        [17750, 18249.99, 18000],
+        [18250, 18749.99, 18500],
+        [18750, 19249.99, 19000],
+        [19250, 19749.99, 19500],
+        [19750, 20249.99, 20000],
+        [20250, 20749.99, 20500],
+        [20750, 21249.99, 21000],
+        [21250, 21749.99, 21500],
+        [21750, 22249.99, 22000],
+        [22250, 22749.99, 22500],
+        [22750, 23249.99, 23000],
+        [23250, 23749.99, 23500],
+        [23750, 24249.99, 24000],
+        [24250, 24749.99, 24500],
+        [24750, 25249.99, 25000],
+        [25250, 25749.99, 25500],
+        [25750, 26249.99, 26000],
+        [26250, 26749.99, 26500],
+        [26750, 27249.99, 27000],
+        [27250, 27749.99, 27500],
+        [27750, 28249.99, 28000],
+        [28250, 28749.99, 28500],
+        [28750, 29249.99, 29000],
+        [29250, 29749.99, 29500],
+        [29750, 30249.99, 30000],
+        [30250, 30749.99, 30500],
+        [30750, 31249.99, 31000],
+        [31250, 31749.99, 31500],
+        [31750, 32249.99, 32000],
+        [32250, 32749.99, 32500],
+        [32750, 33249.99, 33000],
+        [33250, 33749.99, 33500],
+        [33750, 34249.99, 34000],
+        [34250, 34749.99, 34500],
+        [34750, Infinity,  35000],
+        ]; 
+
+        const SSS_employee_rate = 0.05;  // 5% employee share (2025)
+
+        const Philhealth_rate             = 0.05;       // 5% total contribution (2024)
+        const Philhealth_employee_share   = 0.5;        // 50% employee share of total contribution
+        const Philhealth_min_premium      = 500.00;     // Minimum PhilHealth contribution (2024)
+        const Philhealth_max_premium      = 5000.00;    // Maximum PhilHealth contribution (2024)
+        const Philhealth_floor_salary     = 10000.00;   // Minimum salary for PhilHealth contribution (2024)
+        const Philhealth_ceiling_salary   = 100000.00;  // Maximum salary for PhilHealth contribution (2024)
+
+    </script>
 </body>
 </html>
