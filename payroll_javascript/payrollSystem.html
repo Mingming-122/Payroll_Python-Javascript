@@ -214,10 +214,91 @@
         const Pagibig_rate_low  = 0.01;      // 1% employee share for monthly salary ≤ ₱5,000
         const Pagibig_rate_high = 0.02;      // 2% employee share for monthly salary > ₱5,000
         const Pagibig_MFS       = 10000.00;  // Maximum Fund Salary  (MFS)
-        const Pagibig_MAX       = 200.00;    // Max employee share: 2% × ₱10,000
+        const Pagibig_Max       = 200.00;    // Max employee share: 2% × ₱10,000
 
         const GSIS_employee_rate = 0.09;
 
+        /** BIR TRAIN Law brackets [excessOver, baseTax, rateOnExcess] */
+        const BIR_brackets = [
+          [0,        0,        0.00],
+          [250000,   0,        0.15],
+          [400000,   22500,    0.20],
+          [800000,   102500,   0.25],
+          [2000000,  402500,   0.30],
+          [8000000,  2202500,  0.35],
+        ];
+        
+        const BIR_thresholds = [0, 250000, 400000, 800000, 2000000, 8000000];
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        //  COMPUTATION FUNCTIONS  (same logic as Python — procedural)
+        // ─────────────────────────────────────────────────────────────────────────────
+    
+        function computeSSS(monthlySalary) {
+            // 2025: Min MSC ₱5,000 — all salaries below ₱5,250 map to MSC ₱5,000
+            for (const [minS, maxS, msc] of table) {
+                if (monthlySalary >= minS && monthlySalary <= maxS)
+                return round2(msc * SSS_employee_rate);
+            }
+            return round2(35000 * SSS_employee_rate); // fallback max
+        }
+
+        function computePhilHealth(monthlySalary) {
+            let premium;
+            if (monthlySalary <= Philhealth_floor_salary)         premium = Philhealth_min_premium;
+            else if (monthlySalary >= Philhealth_ceiling_salary)  premium = Philhealth_max_premium;
+            else                                                   premium = monthlySalary * Philhealth_rate;
+            return round2(premium * Philhealth_employee_share);
+        }  
+
+        function computePagIbig(monthlySalary) {
+            // 2025: Contribution based on salary up to MFS cap of ₱10,000; max ₱200/mo
+            const base = Math.min(monthlySalary, Pagibig_MFS);
+            const rate = monthlySalary <= 1500 ? Pagibig_rate_low : Pagibig_rate_high;
+            return round2(Math.min(base * rate, Pagibig_Max));
+        }
+
+        function computeGSIS(monthlySalary) {
+        return round2(monthlySalary * GSIS_employee_rate);
+        }
+    
+        function computeBIRAnnual(annualTaxableIncome) {
+        if (annualTaxableIncome <= 0) return 0;
+        for (let i = BIR_thresholds.length - 1; i >= 0; i--) {
+            if (annualTaxableIncome > BIR_thresholds[i]) {
+                const [excessOver, baseTax, rate] = BIR_brackets[i];
+                return round2(baseTax + (annualTaxableIncome - excessOver) * rate);
+            }
+        }
+        return 0;
+        }
+
+        function computeMonthlyBIR(monthlyTaxableIncome) {
+            const annual    = monthlyTaxableIncome * 12;
+            const annualTax = computeBIRAnnual(annual);
+            return round2(annualTax / 12);
+        }
+
+        function _computePayroll(employeeType, monthlySalary, allowances) {
+            const sss        = employeeType === 'private'     ? computeSSS(monthlySalary) : 0;
+            const gsis       = employeeType === 'government'  ? computeGSIS(monthlySalary) : 0;
+            const philhealth = computePhilHealth(monthlySalary);
+            const pagibig    = computePagIbig(monthlySalary);
+
+            const totalMandatory = round2(sss + gsis + philhealth + pagibig);
+            const grossPay       = round2(monthlySalary + allowances);
+            const taxableIncome  = round2(Math.max(monthlySalary - totalMandatory, 0));
+            const withholdingTax = computeMonthlyBIR(taxableIncome);
+            const totalDeductions= round2(totalMandatory + withholdingTax);
+            const netPay         = round2(grossPay - totalDeductions);
+
+            return {
+                employeeType, monthlySalary, allowances, grossPay,
+                sss, gsis, philhealth, pagibig,
+                totalMandatory, taxableIncome, withholdingTax,
+                totalDeductions, netPay,
+            };
+        }
     </script>
 </body>
 </html>
