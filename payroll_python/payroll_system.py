@@ -25,7 +25,7 @@ Date                 : 2025
 # Rate: 15% total (Employee: 5%, Employer: 10%)
 # Min MSC: ₱5,000 | Max MSC: ₱35,000
 # Each entry: (min_salary, max_salary, msc)
-SSS_TABLE = [
+SSS_table = [
     (0,      5249.99,  5000),
     (5250,   5749.99,  5500),
     (5750,   6249.99,  6000),
@@ -88,28 +88,28 @@ SSS_TABLE = [
     (34250, 34749.99, 34500),
     (34750, float('inf'), 35000),
 ]
-SSS_EMPLOYEE_RATE = 0.05         # 5% employee share (2025)
+SSS_employee_rate = 0.05         # 5% employee share (2025)
 
-# --- PhilHealth (2024) ---
-PHILHEALTH_RATE        = 0.05    # 5% total premium
-PHILHEALTH_EMPLOYEE_SHARE = 0.5  # Employee pays half (2.5%)
-PHILHEALTH_MIN_PREMIUM = 500.00  # minimum monthly premium (salary floor 10,000)
-PHILHEALTH_MAX_PREMIUM = 5000.00 # maximum monthly premium (salary ceiling 100,000)
-PHILHEALTH_FLOOR_SALARY = 10000.00
-PHILHEALTH_CEILING_SALARY = 100000.00
+# --- PhilHealth (2025) ---
+Philhealth_rate           = 0.05    # 5% total premium
+Philhealth_employee_share = 0.5     # Employee pays half (2.5%)
+Philhealth_min_premium    = 500.00  # minimum monthly premium (salary floor 10,000)
+Philhealth_max_premium    = 5000.00 # maximum monthly premium (salary ceiling 100,000)
+Philhealth_floor_salary   = 10000.00
+Philhealth_ceiling_salary = 100000.00
 
 # --- Pag-IBIG (HDMF) — Pag-IBIG Circular No. 460 (2025) ---
-PAGIBIG_RATE_LOW  = 0.01   # 1% for salary ≤ 1,500
-PAGIBIG_RATE_HIGH = 0.02   # 2% for salary > 1,500
-PAGIBIG_MFS             = 10000.00  # Maximum Fund Salary (raised from ₱5,000)
-PAGIBIG_MAX_CONTRIBUTION = 200.00   # Max employee share: 2% × ₱10,000 = ₱200
+Pagibig_rate_low  = 0.01     # 1% for salary ≤ 1,500
+Pagibig_rate_high = 0.02     # 2% for salary > 1,500
+Pagibig_MFS       = 10000.00 # Maximum Fund Salary (raised from ₱5,000)
+Pagibig_max       = 200.00   # Max employee share: 2% × ₱10,000 = ₱200
 
 # --- GSIS (Government employees only) ---
-GSIS_EMPLOYEE_RATE = 0.09  # 9% employee share
+GSIS_employee_rate = 0.09  # 9% employee share
 
 # --- BIR / TRAIN Law Income Tax Brackets (Annual) ---
 # (excess_over, base_tax, rate_on_excess)
-BIR_BRACKETS = [
+BIR_brackets = [
     (0,           0,          0.00),   # 0 – 250,000         : 0%
     (250000,      0,          0.15),   # 250,001 – 400,000   : 15%
     (400000,      22500,      0.20),   # 400,001 – 800,000   : 20%
@@ -117,7 +117,7 @@ BIR_BRACKETS = [
     (2000000,     402500,     0.30),   # 2,000,001 – 8,000,000 : 30%
     (8000000,     2202500,    0.35),   # Over 8,000,000      : 35%
 ]
-BIR_THRESHOLDS = [0, 250000, 400000, 800000, 2000000, 8000000]
+BIR_thresholds  = [0, 250000, 400000, 800000, 2000000, 8000000]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -126,37 +126,37 @@ BIR_THRESHOLDS = [0, 250000, 400000, 800000, 2000000, 8000000]
 
 def compute_sss(monthly_salary):
     """Compute SSS employee monthly contribution based on 2025 MSC table."""
-    for (min_s, max_s, msc) in SSS_TABLE:
+    for (min_s, max_s, msc) in SSS_table:
         if min_s <= monthly_salary <= max_s:
-            return round(msc * SSS_EMPLOYEE_RATE, 2)
-    return round(35000 * SSS_EMPLOYEE_RATE, 2)  # fallback max
+            return round(msc * SSS_employee_rate, 2)
+    return round(35000 * SSS_employee_rate, 2)  # fallback max
 
 
 def compute_philhealth(monthly_salary):
     """Compute PhilHealth employee monthly contribution."""
-    if monthly_salary <= PHILHEALTH_FLOOR_SALARY:
-        premium = PHILHEALTH_MIN_PREMIUM
-    elif monthly_salary >= PHILHEALTH_CEILING_SALARY:
-        premium = PHILHEALTH_MAX_PREMIUM
+    if monthly_salary <= Philhealth_floor_salary:
+        premium = Philhealth_min_premium
+    elif monthly_salary >= Philhealth_ceiling_salary:
+        premium = Philhealth_max_premium
     else:
-        premium = monthly_salary * PHILHEALTH_RATE
-    return round(premium * PHILHEALTH_EMPLOYEE_SHARE, 2)
+        premium = monthly_salary * Philhealth_rate
+    return round(premium * Philhealth_employee_share, 2)
 
 
 def compute_pagibig(monthly_salary):
     """Compute Pag-IBIG employee monthly contribution (2025 rates)."""
     # Contribution is based on salary up to the MFS cap of ₱10,000
-    base = min(monthly_salary, PAGIBIG_MFS)
+    base = min(monthly_salary, Pagibig_MFS)
     if monthly_salary <= 1500:
-        contribution = base * PAGIBIG_RATE_LOW
+        contribution = base * Pagibig_rate_low
     else:
-        contribution = base * PAGIBIG_RATE_HIGH
-    return round(min(contribution, PAGIBIG_MAX_CONTRIBUTION), 2)
+        contribution = base * Pagibig_rate_high
+    return round(min(contribution, Pagibig_max), 2)
 
 
 def compute_gsis(monthly_salary):
     """Compute GSIS employee monthly contribution (government employees only)."""
-    return round(monthly_salary * GSIS_EMPLOYEE_RATE, 2)
+    return round(monthly_salary * GSIS_employee_rate, 2)
 
 
 def compute_bir_annual(annual_taxable_income):
@@ -168,9 +168,9 @@ def compute_bir_annual(annual_taxable_income):
         return 0.00
 
     tax = 0.00
-    for i in range(len(BIR_THRESHOLDS) - 1, -1, -1):
-        if annual_taxable_income > BIR_THRESHOLDS[i]:
-            excess_over, base_tax, rate = BIR_BRACKETS[i]
+    for i in range(len(BIR_thresholds) - 1, -1, -1):  
+        if annual_taxable_income > BIR_thresholds[i]:
+            excess_over, base_tax, rate = BIR_brackets[i]
             tax = base_tax + (annual_taxable_income - excess_over) * rate
             break
 
@@ -326,7 +326,7 @@ def run_another():
 
 def main():
     print_header()
-    print("  TRAIN Law Tax Rates | SSS 2024 | PhilHealth 5% | Pag-IBIG")
+    print("  TRAIN Law Tax Rates | SSS 2025 | PhilHealth 5% | Pag-IBIG")
     print()
 
     while True:
