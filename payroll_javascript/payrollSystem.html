@@ -593,40 +593,44 @@
         // ─────────────────────────────────────────────────────────────────────────────
         //  COMPUTATION FUNCTIONS  (same logic as Python — procedural)
         // ─────────────────────────────────────────────────────────────────────────────
-    
-        function computeSSS(monthlySalary) {
+        
+        // 2025 SSS Contribution based on MSC
+        function computeSSS(monthlySalary) {  
             // 2025: Min MSC ₱5,000 — all salaries below ₱5,250 map to MSC ₱5,000
             for (const [minS, maxS, msc] of SSS_table) {
                 if (monthlySalary >= minS && monthlySalary <= maxS)
-                return round2(msc * SSS_employee_rate);  
+                return round2(msc * SSS_employee_rate);  // msc * 5%
             }
             return round2(35000 * SSS_employee_rate); // fallback max
         }
 
-        function computePhilHealth(monthlySalary) {
+        // PhilHealth Contribution (2024) — 5% of salary, shared 50/50 (emloyee/employer )
+        function computePhilHealth(monthlySalary) {   
             let premium;
             if (monthlySalary <= Philhealth_floor_salary)         premium = Philhealth_min_premium;
-            else if (monthlySalary >= Philhealth_ceiling_salary)  premium = Philhealth_max_premium;
+            else if (monthlySalary >= Philhealth_ceiling_salary)  premium = Philhealth_max_premium; 
             else                                                   premium = monthlySalary * Philhealth_rate;
-            return round2(premium * Philhealth_employee_share);
-        }  
+            return round2(premium * Philhealth_employee_share);  // 50% employee share
+        } 
 
-        function computePagIbig(monthlySalary) {
+        function computePagIbig(monthlySalary) {  // 
             // 2025: Contribution based on salary up to MFS cap of ₱10,000; max ₱200/mo
             const base = Math.min(monthlySalary, Pagibig_MFS);
-            const rate = monthlySalary <= 1500 ? Pagibig_rate_low : Pagibig_rate_high;
-            return round2(Math.min(base * rate, Pagibig_Max));
+            const rate = monthlySalary <= 1500 ? Pagibig_rate_low : Pagibig_rate_high;  
+            return round2(Math.min(base * rate, Pagibig_Max));  // max ₱200
         }
 
-        function computeGSIS(monthlySalary) {
+        // For Gevernment employees (GSIS) — 9% of monthly salary
+        function computeGSIS(monthlySalary) {  
             return round2(monthlySalary * GSIS_employee_rate);
         }
     
-        function computeBIRAnnual(annualTaxableIncome) {
-            if (annualTaxableIncome <= 0) return 0;
+        // annu
+        function computeBIRAnnual(annualTaxableIncome) {  // 
+            if (annualTaxableIncome <= 0) return 0;  // 
             for (let i = BIR_thresholds.length - 1; i >= 0; i--) {
                 if (annualTaxableIncome > BIR_thresholds[i]) {
-                    const [excessOver, baseTax, rate] = BIR_brackets[i];
+                    const [excessOver, baseTax, rate] = BIR_brackets[i];  // BIR_brackets[i] = [excessOver, baseTax, rate]
                     return round2(baseTax + (annualTaxableIncome - excessOver) * rate);
                 }
             }
