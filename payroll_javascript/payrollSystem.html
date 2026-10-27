@@ -42,10 +42,7 @@
         color: var(--white);
         margin-bottom: 24px;
     }
-    .app-header .flag {
-        font-size: 2.4rem;
-        margin-bottom: 6px;
-    }
+
     .app-header h1 {
         font-size: 1.45rem;
         font-weight: 700;
@@ -58,7 +55,7 @@
         margin-top: 4px;
     }
 
-    .badge-row {
+    .badge_row {
         display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
         margin: 10px 0 22px;
     }
@@ -82,7 +79,7 @@
     }
     .card + .card { margin-top: 20px; }
 
-    .section-title {
+    .section_title {
         font-size: .8rem;
         font-weight: 700;
         text-transform: uppercase;
@@ -99,12 +96,12 @@
         grid-template-columns: 1fr 1fr;
         gap: 16px;
     }
-    .form-group {
+    .form_group {
         display: flex;
         flex-direction: column;
         gap: 6px;
     }
-    .form-group.full { grid-column: 1 / -1; }
+    .form_group.full { grid-column: 1 / -1; }
     label {
         font-size: .82rem;
         font-weight: 600;
@@ -196,7 +193,7 @@
     }
 
     /* ── Payslip Result ──────────────────────────────────────── */
-    #result-section { display: none; }
+    #result_section { display: none; }
 
     .payslip-header {
         display: flex;
@@ -353,8 +350,8 @@
     @media print {
         body { background: white; }
         .card { box-shadow: none; max-width: 100%; }
-        #input-section, .btn-row, .app-header, .badge-row { display: none !important; }
-        #result-section { display: block !important; }
+        #input_section, .btn-row, .app-header, .badge_row { display: none !important; }
+        #result_section { display: block !important; }
     }
 
     @media (max-width: 520px) {
@@ -387,12 +384,12 @@
         <!-- FORM GROUPS -->
         <div class="form-grid">
 
-            <div class="form_group_full">
+            <div class="form_group full">
                 <label for="empName">Employee's Full Name:</label>
                 <input type="text" id="empName" name="empName" placeholder="e.g., Yasmien Mingo" required/>
             </div>
 
-            <div class="form_group_full">
+            <div class="form_group full">
                 <label>Employee Type:</label>
                 <div class="type-toggle">
                     <input type="radio" name="empType" id="typePrivate" value="private" checked />
@@ -402,7 +399,7 @@
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form_group">
                 <label for="basicSalary">Basic Monthly Salary</label>
                 <div class="php-prefix">
                     <span>PHP</span>
@@ -410,7 +407,7 @@
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form_group">
                 <label for="allowances">Non-Taxable Allowances</label>
                 <div class="php-prefix">
                     <span>PHP</span>
@@ -427,10 +424,10 @@
 
     <!-- Result Card -->
     <div class="card" id="result_section">
-        <div class="section-title">📋 Summary</div>
+        <div class="section_title">📋 Summary</div>
         <div class="summary-grid" id="summaryTiles"></div>
 
-        <div class="section-title">Pay Slip</div>
+        <div class="section_title">Pay Slip</div>
         <div class="payslip-header">
             <div class="emp-info">
                 <h2 id="rsName">—</h2>
@@ -463,7 +460,7 @@
 
     <!-- ── Annual Summary Card ── -->
     <div class="card" id="annual-section" style="display:none;">
-        <div class="section-title">📅 Annualized Summary (12 Months)</div>
+        <div class="section_title">📅 Annualized Summary (12 Months)</div>
         <table class="annual-table">
             <thead>
                 <tr>
@@ -625,7 +622,7 @@
             return round2(monthlySalary * GSIS_employee_rate);
         }
     
-        // annu
+        // annnualTaxableIncome: annual taxable income in PHP
         function computeBIRAnnual(annualTaxableIncome) {  // 
             if (annualTaxableIncome <= 0) return 0;  // 
             for (let i = BIR_thresholds.length - 1; i >= 0; i--) {
@@ -668,8 +665,8 @@
         //  UTILITY
         // ─────────────────────────────────────────────────────────────────────────────
 
-        function round2(n)      { 
-            return Math.round(n * 100) / 100;
+        function round2(n)      {   
+            return Math.round(n * 100) / 100;   
         }
         function php(n)         { 
             return 'PHP ' + n.toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2}); 
@@ -767,9 +764,9 @@
                 `<tr><td><strong>Annual Take-Home Pay</strong></td><td>${php(r.netPay)}</td><td>${php(r.netPay*12)}</td></tr>`;
 
             // ─── Show results
-            document.getElementById('result-section').style.display  = 'block';
+            document.getElementById('result_section').style.display  = 'block';
             document.getElementById('annual-section').style.display  = 'block';
-            document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('result_section').scrollIntoView({ behavior: 'smooth' });
         }
 
         function resetForm() {
@@ -777,14 +774,14 @@
             document.getElementById('basicSalary').value   = '';
             document.getElementById('allowances').value    = '0';
             document.getElementById('typePrivate').checked = true;
-            document.getElementById('result-section').style.display = 'none';
+            document.getElementById('result_section').style.display = 'none';
             document.getElementById('annual-section').style.display = 'none';
         }
 
         function newComputation() {
-            document.getElementById('result-section').style.display = 'none';
+            document.getElementById('result_section').style.display = 'none';
             document.getElementById('annual-section').style.display = 'none';
-            document.getElementById('input-section').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('input_section').scrollIntoView({ behavior: 'smooth' });
         }
 
         function printPayslip() { 
@@ -801,4 +798,4 @@
 
 
 </body>
-</html>+=9
+</html>
