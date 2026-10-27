@@ -1,11 +1,364 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PH Payroll & Tax System</title>
-    <!-- <link rel="stylesheet" href="payrollSystem.css"> -->
+    <meta charset="UTF-8"/>
+    <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>PH Payroll & Tax System</title>  
+    
+    <style>
+    /* ── Reset & Base ────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+        --blue-dark  : #003087;
+        --blue       : #0044bb;
+        --blue-light : #e8eeff;
+        --gold       : #f5a623;
+        --red        : #c0392b;
+        --green      : #27ae60;
+        --gray-100   : #f4f6fb;
+        --gray-200   : #e2e8f0;
+        --gray-400   : #94a3b8;
+        --gray-700   : #334155;
+        --gray-900   : #0f172a;
+        --white      : #ffffff;
+        --shadow     : 0 4px 24px rgba(0,0,0,.12);
+        --radius     : 12px;
+    }
+    body {
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        background: linear-gradient(135deg, var(--blue-dark) 0%, #001a5c 100%);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 24px 12px 48px;
+        color: var(--gray-700);
+    }
+
+    /* ── App Shell ───────────────────────────────────────────── */
+    .app-header {
+        text-align: center;
+        color: var(--white);
+        margin-bottom: 24px;
+    }
+
+    .app-header h1 {
+        font-size: 1.45rem;
+        font-weight: 700;
+        letter-spacing: .5px;
+        text-shadow: 0 2px 8px rgba(0,0,0,.4);
+    }
+    .app-header p {
+        font-size: .88rem;
+        opacity: .8;
+        margin-top: 4px;
+    }
+
+    .badge_row {
+        display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+        margin: 10px 0 22px;
+    }
+    .badge {
+        background: rgba(255,255,255,.18);
+        color: #fff;
+        font-size: .75rem;
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,.3);
+        }
+
+    .card {
+        background: var(--white);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 28px 28px 24px;
+        width: 100%;
+        max-width: 680px;
+    }
+    .card + .card { margin-top: 20px; }
+
+    .section_title {
+        font-size: .8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--blue-dark);
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid var(--blue-light);
+    }
+
+    /* ── Form ────────────────────────────────────────────────── */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+    .form_group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .form_group.full { grid-column: 1 / -1; }
+    label {
+        font-size: .82rem;
+        font-weight: 600;
+        color: var(--gray-700);
+    }
+    input[type="text"],
+    input[type="number"],
+    select {
+        padding: 10px 14px;
+        border: 1.5px solid var(--gray-200);
+        border-radius: 8px;
+        font-size: .95rem;
+        transition: border-color .2s, box-shadow .2s;
+        color: var(--gray-900);
+        background: var(--gray-100);
+    }
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+        outline: none;
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(0,68,187,.15);
+        background: var(--white);
+    }
+    .php-prefix {
+        position: relative;
+    }
+    .php-prefix span {
+        position: absolute;
+        left: 12px; top: 50%;
+        transform: translateY(-50%);
+        font-weight: 700;
+        color: var(--gray-400);
+        font-size: .9rem;
+        pointer-events: none;
+    }
+    .php-prefix input { padding-left: 42px; }
+
+    /* Employee type toggle */
+    .type-toggle {
+        display: flex; gap: 0;
+        border: 1.5px solid var(--gray-200);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .type-toggle input[type="radio"] { display: none; }
+    .type-toggle label {
+        flex: 1;
+        text-align: center;
+        padding: 10px 6px;
+        cursor: pointer;
+        font-size: .88rem;
+        font-weight: 600;
+        transition: background .2s, color .2s;
+        color: var(--gray-400);
+        background: var(--gray-100);
+        border: none;
+        user-select: none;
+    }
+    .type-toggle input[type="radio"]:checked + label {
+        background: var(--blue-dark);
+        color: var(--white);
+    }
+
+    /* Action buttons */
+    .btn-row {
+        display: flex; gap: 12px; margin-top: 22px;
+    }
+    .btn {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-size: .95rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform .15s, box-shadow .15s;
+    }
+    .btn:active { transform: scale(.97); }
+    .btn-primary {
+        background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+        color: var(--white);
+        box-shadow: 0 4px 14px rgba(0,68,187,.35);
+    }
+    .btn-secondary {
+        background: var(--gray-100);
+        color: var(--gray-700);
+        border: 1.5px solid var(--gray-200);
+    }
+
+    /* ── Payslip Result ──────────────────────────────────────── */
+    #result_section { display: none; }
+
+    .payslip-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 18px;
+    }
+    .payslip-header .emp-info h2 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--gray-900);
+    }
+    .payslip-header .emp-info .type-chip {
+        display: inline-block;
+        font-size: .72rem;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+        margin-top: 4px;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+    }
+    .chip-private    { background: #dbeafe; color: #1d4ed8; }
+    .chip-government { background: #dcfce7; color: #15803d; }
+
+    .payslip-header .gross-box {
+        text-align: right;
+    }
+    .payslip-header .gross-box .label {
+        font-size: .75rem;
+        color: var(--gray-400);
+    }
+    .payslip-header .gross-box .amount {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: var(--blue-dark);
+    }
+
+    /* Payslip rows */
+    .payslip-table { width: 100%; border-collapse: collapse; }
+    .payslip-table tr td {
+        padding: 7px 4px;
+        font-size: .88rem;
+    }
+    .payslip-table tr td:last-child { text-align: right; font-weight: 600; }
+    .payslip-table .row-section td {
+        font-size: .72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .8px;
+        color: var(--blue-dark);
+        background: var(--blue-light);
+        padding: 5px 8px;
+        border-radius: 4px;
+    }
+    .payslip-table .row-subtotal td {
+        font-weight: 700;
+        border-top: 1px solid var(--gray-200);
+        padding-top: 8px;
+        margin-top: 4px;
+    }
+    .payslip-table .row-subtotal td:last-child { color: var(--red); }
+    .row-positive td:last-child { color: var(--green) !important; }
+
+    /* Net Pay Banner */
+    .net-pay-banner {
+        margin-top: 20px;
+        background: linear-gradient(135deg, var(--blue-dark), #001a5c);
+        color: var(--white);
+        border-radius: 10px;
+        padding: 18px 22px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .net-pay-banner .label {
+        font-size: .85rem;
+        opacity: .8;
+    }
+    .net-pay-banner .value {
+        font-size: 1.7rem;
+        font-weight: 900;
+        letter-spacing: .5px;
+    }
+
+    /* Summary Tiles */
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    .tile {
+        background: var(--gray-100);
+        border: 1.5px solid var(--gray-200);
+        border-radius: 10px;
+        padding: 14px 12px;
+        text-align: center;
+    }
+    .tile .tile-label {
+        font-size: .72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        color: var(--gray-400);
+        margin-bottom: 4px;
+    }
+    .tile .tile-value {
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--gray-900);
+    }
+    .tile.highlight {
+        background: var(--blue-light);
+        border-color: #b3c6ff;
+    }
+    .tile.highlight .tile-value { color: var(--blue-dark); }
+    .tile.danger   { background: #fff0f0; border-color: #ffc9c9; }
+    .tile.danger   .tile-value { color: var(--red); }
+    .tile.success  { background: #f0fff4; border-color: #a7f3d0; }
+    .tile.success  .tile-value { color: var(--green); }
+
+    /* ── Annualized Summary ──────────────────────────────────── */
+    .annual-table { width: 100%; border-collapse: collapse; }
+    .annual-table th {
+      background: var(--blue-dark);
+      color: var(--white);
+      font-size: .78rem;
+      padding: 8px 10px;
+      text-align: left;
+    }
+    .annual-table th:last-child, .annual-table td:last-child { text-align: right; }
+    .annual-table td {
+        padding: 8px 10px;
+        font-size: .85rem;
+        border-bottom: 1px solid var(--gray-200);
+    }
+    .annual-table tr:nth-child(even) td { background: var(--gray-100); }
+    .annual-table tfoot td {
+        font-weight: 700;
+        background: #f0f4ff;
+        color: var(--blue-dark);
+    }
+
+    /* ── Footer ─────────────────────────────────────────────── */
+    .footer {
+        margin-top: 32px;
+        color: rgba(255,255,255,.5);
+        font-size: .75rem;
+        text-align: center;
+    }
+
+    /* Print */
+    @media print {
+        body { background: white; }
+        .card { box-shadow: none; max-width: 100%; }
+        #input_section, .btn-row, .app-header, .badge_row { display: none !important; }
+        #result_section { display: block !important; }
+    }
+
+    @media (max-width: 520px) {
+        .form-grid { grid-template-columns: 1fr; }
+        .payslip-header { flex-direction: column; gap: 10px; }
+        }
+  </style>
 </head>
 
 <body>
@@ -13,6 +366,7 @@
 
     <header class="app-header">
         <h1>Philippine Payroll & Tax Computation System</h1>
+  <p>BIR (TRAIN Law) &nbsp;·&nbsp; SSS &nbsp;·&nbsp; PhilHealth &nbsp;·&nbsp; Pag-IBIG &nbsp;·&nbsp; GSIS</p>
     </header>
 
     <div class = "badge_row">
@@ -29,12 +383,13 @@
 
         <!-- FORM GROUPS -->
         <div class="form-grid">
-            <div class="form_group">
+
+            <div class="form_group full">
                 <label for="empName">Employee's Full Name:</label>
                 <input type="text" id="empName" name="empName" placeholder="e.g., Yasmien Mingo" required/>
             </div>
 
-            <div class="form_group_full">
+            <div class="form_group full">
                 <label>Employee Type:</label>
                 <div class="type-toggle">
                     <input type="radio" name="empType" id="typePrivate" value="private" checked />
@@ -44,7 +399,7 @@
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form_group">
                 <label for="basicSalary">Basic Monthly Salary</label>
                 <div class="php-prefix">
                     <span>PHP</span>
@@ -52,7 +407,7 @@
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form_group">
                 <label for="allowances">Non-Taxable Allowances</label>
                 <div class="php-prefix">
                     <span>PHP</span>
@@ -69,10 +424,10 @@
 
     <!-- Result Card -->
     <div class="card" id="result_section">
-        <div class="section-title">📋 Summary</div>
+        <div class="section_title">📋 Summary</div>
         <div class="summary-grid" id="summaryTiles"></div>
 
-        <div class="section-title">Pay Slip</div>
+        <div class="section_title">Pay Slip</div>
         <div class="payslip-header">
             <div class="emp-info">
                 <h2 id="rsName">—</h2>
@@ -103,8 +458,9 @@
         </div>
     </div>
 
+    <!-- ── Annual Summary Card ── -->
     <div class="card" id="annual-section" style="display:none;">
-        <div class="section-title">📅 Annualized Summary (12 Months)</div>
+        <div class="section_title">📅 Annualized Summary (12 Months)</div>
         <table class="annual-table">
             <thead>
                 <tr>
@@ -120,7 +476,7 @@
 
     <footer class="footer">
         Philippine Payroll &amp; Tax System &nbsp;·&nbsp; TRAIN Law | SSS 2025 (Circ. 2024-006) | PhilHealth 5% | Pag-IBIG Circ. 460 | GSIS<br/>
-        For reference only. Consult a licensed accountant for official tax computations.
+        This is a trial implementation for MCO 1. Please consult a licensed accountant for official tax computations.
     </footer>
 
     <!-- ══════════════════════════════════════════════════════════════
@@ -138,67 +494,67 @@
         <!-- SSS Circular No. 2024-006 | Rate: 5% EE | MSC range ₱5,000–₱35,000 **/  
         
         const SSS_table = [  
-        [0,      5249.99,  5000], // below 5,250 (range of contribution), Minimum MSC ₱5,000
-        [5250,   5749.99,  5500],
-        [5750,   6249.99,  6000],
-        [6250,   6749.99,  6500],
-        [6750,   7249.99,  7000],
-        [7250,   7749.99,  7500],
-        [7750,   8249.99,  8000],
-        [8250,   8749.99,  8500],
-        [8750,   9249.99,  9000],
-        [9250,   9749.99,  9500],
-        [9750,  10249.99, 10000],
-        [10250, 10749.99, 10500],
-        [10750, 11249.99, 11000],
-        [11250, 11749.99, 11500],
-        [11750, 12249.99, 12000],
-        [12250, 12749.99, 12500],
-        [12750, 13249.99, 13000],
-        [13250, 13749.99, 13500],
-        [13750, 14249.99, 14000],
-        [14250, 14749.99, 14500],
-        [14750, 15249.99, 15000],
-        [15250, 15749.99, 15500],
-        [15750, 16249.99, 16000],
-        [16250, 16749.99, 16500],
-        [16750, 17249.99, 17000],
-        [17250, 17749.99, 17500],
-        [17750, 18249.99, 18000],
-        [18250, 18749.99, 18500],
-        [18750, 19249.99, 19000],
-        [19250, 19749.99, 19500],
-        [19750, 20249.99, 20000],
-        [20250, 20749.99, 20500],
-        [20750, 21249.99, 21000],
-        [21250, 21749.99, 21500],
-        [21750, 22249.99, 22000],
-        [22250, 22749.99, 22500],
-        [22750, 23249.99, 23000],
-        [23250, 23749.99, 23500],
-        [23750, 24249.99, 24000],
-        [24250, 24749.99, 24500],
-        [24750, 25249.99, 25000],
-        [25250, 25749.99, 25500],
-        [25750, 26249.99, 26000],
-        [26250, 26749.99, 26500],
-        [26750, 27249.99, 27000],
-        [27250, 27749.99, 27500],
-        [27750, 28249.99, 28000],
-        [28250, 28749.99, 28500],
-        [28750, 29249.99, 29000],
-        [29250, 29749.99, 29500],
-        [29750, 30249.99, 30000],
-        [30250, 30749.99, 30500],
-        [30750, 31249.99, 31000],
-        [31250, 31749.99, 31500],
-        [31750, 32249.99, 32000],
-        [32250, 32749.99, 32500],
-        [32750, 33249.99, 33000],
-        [33250, 33749.99, 33500],
-        [33750, 34249.99, 34000],
-        [34250, 34749.99, 34500],
-        [34750, Infinity,  35000],
+            [0,      5249.99,  5000], // below 5,250 (range of contribution), Minimum MSC ₱5,000
+            [5250,   5749.99,  5500],
+            [5750,   6249.99,  6000],
+            [6250,   6749.99,  6500],
+            [6750,   7249.99,  7000],
+            [7250,   7749.99,  7500],
+            [7750,   8249.99,  8000],
+            [8250,   8749.99,  8500],
+            [8750,   9249.99,  9000],
+            [9250,   9749.99,  9500],
+            [9750,  10249.99, 10000],
+            [10250, 10749.99, 10500],
+            [10750, 11249.99, 11000],
+            [11250, 11749.99, 11500],
+            [11750, 12249.99, 12000],
+            [12250, 12749.99, 12500],
+            [12750, 13249.99, 13000],
+            [13250, 13749.99, 13500],
+            [13750, 14249.99, 14000],
+            [14250, 14749.99, 14500],
+            [14750, 15249.99, 15000],
+            [15250, 15749.99, 15500],
+            [15750, 16249.99, 16000],
+            [16250, 16749.99, 16500],
+            [16750, 17249.99, 17000],
+            [17250, 17749.99, 17500],
+            [17750, 18249.99, 18000],
+            [18250, 18749.99, 18500],
+            [18750, 19249.99, 19000],
+            [19250, 19749.99, 19500],
+            [19750, 20249.99, 20000],
+            [20250, 20749.99, 20500],
+            [20750, 21249.99, 21000],
+            [21250, 21749.99, 21500],
+            [21750, 22249.99, 22000],
+            [22250, 22749.99, 22500],
+            [22750, 23249.99, 23000],
+            [23250, 23749.99, 23500],
+            [23750, 24249.99, 24000],
+            [24250, 24749.99, 24500],
+            [24750, 25249.99, 25000],
+            [25250, 25749.99, 25500],
+            [25750, 26249.99, 26000],
+            [26250, 26749.99, 26500],
+            [26750, 27249.99, 27000],
+            [27250, 27749.99, 27500],
+            [27750, 28249.99, 28000],
+            [28250, 28749.99, 28500],
+            [28750, 29249.99, 29000],
+            [29250, 29749.99, 29500],
+            [29750, 30249.99, 30000],
+            [30250, 30749.99, 30500],
+            [30750, 31249.99, 31000],
+            [31250, 31749.99, 31500],
+            [31750, 32249.99, 32000],
+            [32250, 32749.99, 32500],
+            [32750, 33249.99, 33000],
+            [33250, 33749.99, 33500],
+            [33750, 34249.99, 34000],
+            [34250, 34749.99, 34500],
+            [34750, Infinity,  35000],
         ]; 
 
         const SSS_employee_rate = 0.05;  // 5% employee share (2025)
@@ -219,13 +575,14 @@
         const GSIS_employee_rate = 0.09;
 
         /** BIR TRAIN Law brackets [excessOver, baseTax, rateOnExcess] */
+        //  Annual Taxable Income (₱) | Base Tax (₱) | Rate on Excess (%)
         const BIR_brackets = [
-          [0,        0,        0.00],
-          [250000,   0,        0.15],
-          [400000,   22500,    0.20],
-          [800000,   102500,   0.25],
-          [2000000,  402500,   0.30],
-          [8000000,  2202500,  0.35],
+            [0,        0,        0.00],
+            [250000,   0,        0.15], 
+            [400000,   22500,    0.20],
+            [800000,   102500,   0.25],
+            [2000000,  402500,   0.30],
+            [8000000,  2202500,  0.35],
         ];
         
         const BIR_thresholds = [0, 250000, 400000, 800000, 2000000, 8000000];
@@ -233,43 +590,47 @@
         // ─────────────────────────────────────────────────────────────────────────────
         //  COMPUTATION FUNCTIONS  (same logic as Python — procedural)
         // ─────────────────────────────────────────────────────────────────────────────
-    
-        function computeSSS(monthlySalary) {
+        
+        // 2025 SSS Contribution based on MSC
+        function computeSSS(monthlySalary) {  
             // 2025: Min MSC ₱5,000 — all salaries below ₱5,250 map to MSC ₱5,000
-            for (const [minS, maxS, msc] of table) {
+            for (const [minS, maxS, msc] of SSS_table) {
                 if (monthlySalary >= minS && monthlySalary <= maxS)
-                return round2(msc * SSS_employee_rate);
+                return round2(msc * SSS_employee_rate);  // msc * 5%
             }
             return round2(35000 * SSS_employee_rate); // fallback max
         }
 
-        function computePhilHealth(monthlySalary) {
+        // PhilHealth Contribution (2024) — 5% of salary, shared 50/50 (emloyee/employer )
+        function computePhilHealth(monthlySalary) {   
             let premium;
             if (monthlySalary <= Philhealth_floor_salary)         premium = Philhealth_min_premium;
-            else if (monthlySalary >= Philhealth_ceiling_salary)  premium = Philhealth_max_premium;
+            else if (monthlySalary >= Philhealth_ceiling_salary)  premium = Philhealth_max_premium; 
             else                                                   premium = monthlySalary * Philhealth_rate;
-            return round2(premium * Philhealth_employee_share);
-        }  
+            return round2(premium * Philhealth_employee_share);  // 50% employee share
+        } 
 
-        function computePagIbig(monthlySalary) {
+        function computePagIbig(monthlySalary) {  // 
             // 2025: Contribution based on salary up to MFS cap of ₱10,000; max ₱200/mo
             const base = Math.min(monthlySalary, Pagibig_MFS);
-            const rate = monthlySalary <= 1500 ? Pagibig_rate_low : Pagibig_rate_high;
-            return round2(Math.min(base * rate, Pagibig_Max));
+            const rate = monthlySalary <= 1500 ? Pagibig_rate_low : Pagibig_rate_high;  
+            return round2(Math.min(base * rate, Pagibig_Max));  // max ₱200
         }
 
-        function computeGSIS(monthlySalary) {
-        return round2(monthlySalary * GSIS_employee_rate);
+        // For Gevernment employees (GSIS) — 9% of monthly salary
+        function computeGSIS(monthlySalary) {  
+            return round2(monthlySalary * GSIS_employee_rate);
         }
     
-        function computeBIRAnnual(annualTaxableIncome) {
-        if (annualTaxableIncome <= 0) return 0;
-        for (let i = BIR_thresholds.length - 1; i >= 0; i--) {
-            if (annualTaxableIncome > BIR_thresholds[i]) {
-                const [excessOver, baseTax, rate] = BIR_brackets[i];
-                return round2(baseTax + (annualTaxableIncome - excessOver) * rate);
+        // annnualTaxableIncome: annual taxable income in PHP
+        function computeBIRAnnual(annualTaxableIncome) {  // 
+            if (annualTaxableIncome <= 0) return 0;  // 
+            for (let i = BIR_thresholds.length - 1; i >= 0; i--) {
+                if (annualTaxableIncome > BIR_thresholds[i]) {
+                    const [excessOver, baseTax, rate] = BIR_brackets[i];  // BIR_brackets[i] = [excessOver, baseTax, rate]
+                    return round2(baseTax + (annualTaxableIncome - excessOver) * rate);
+                }
             }
-        }
         return 0;
         }
 
@@ -299,6 +660,142 @@
                 totalDeductions, netPay,
             };
         }
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        //  UTILITY
+        // ─────────────────────────────────────────────────────────────────────────────
+
+        function round2(n)      {   
+            return Math.round(n * 100) / 100;   
+        }
+        function php(n)         { 
+            return 'PHP ' + n.toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2}); 
+        }
+        function pct(n, base)   { 
+            return base > 0 ? ((n/base)*100).toFixed(1)+'%' : '0%'; 
+        }
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        //  UI RENDER
+        // ─────────────────────────────────────────────────────────────────────────────
+
+        function computePayroll_UI() {
+            const name    = document.getElementById('empName').value.trim() || 'Unknown Employee';
+            const type    = document.querySelector('input[name="empType"]:checked').value;
+            const salary  = parseFloat(document.getElementById('basicSalary').value) || 0;
+            const allow   = parseFloat(document.getElementById('allowances').value)  || 0;
+
+            if (salary <= 0) {
+                alert('Please enter a valid Basic Monthly Salary greater than 0.');
+                return;
+            }
+
+            const r = _computePayroll(type, salary, allow);
+
+            // ─── Header
+            document.getElementById('rsName').textContent = name;
+            const typeChip = document.getElementById('rsType');
+            typeChip.textContent  = type === 'private' ? '🏢 Private Employee (SSS)' : '🏛 Government Employee (GSIS)';
+            typeChip.className    = 'type-chip ' + (type === 'private' ? 'chip-private' : 'chip-government');
+            document.getElementById('rsGross').textContent = php(r.grossPay);
+
+            // ─── Summary Tiles
+            const tiles = [
+                { label: 'Gross Pay',        value: php(r.grossPay),         cls: 'highlight' },
+                { label: type==='private' ? 'SSS' : 'GSIS',
+                                            value: php(type==='private'?r.sss:r.gsis), cls: '' },
+                { label: 'PhilHealth',       value: php(r.philhealth),       cls: '' },
+                { label: 'Pag-IBIG',         value: php(r.pagibig),          cls: '' },
+                { label: 'BIR Tax',          value: php(r.withholdingTax),   cls: 'danger' },
+                { label: 'Net Pay',          value: php(r.netPay),           cls: 'success' },
+            ];
+            document.getElementById('summaryTiles').innerHTML = tiles
+                .map(t => `<div class="tile ${t.cls}"><div class="tile-label">${t.label}</div><div class="tile-value">${t.value}</div></div>`)
+                .join('');
+
+            // ─── Payslip Body
+            const rows = [];
+            const addSection  = (label)           => `<tr class="row-section"><td colspan="2">${label}</td></tr>`;
+            const addRow      = (label, val, cls='') =>
+                `<tr class="${cls}"><td>${label}</td><td>${php(val)}</td></tr>`;
+            const addSubtotal = (label, val, cls='') =>
+                `<tr class="row-subtotal ${cls}"><td><strong>${label}</strong></td><td>${php(val)}</td></tr>`;
+
+            rows.push(addSection('Earnings'));
+            rows.push(addRow('Basic Monthly Salary', r.monthlySalary, 'row-positive'));
+            if (r.allowances > 0) rows.push(addRow('Non-Taxable Allowances', r.allowances, 'row-positive'));
+
+            rows.push(addSection('Mandatory Deductions'));
+            if (type === 'private')
+                rows.push(addRow('SSS Contribution (5% of MSC)', r.sss));
+            else
+                rows.push(addRow('GSIS Contribution (9%)', r.gsis));
+            rows.push(addRow('PhilHealth (2.5% employee share)', r.philhealth));
+            rows.push(addRow('Pag-IBIG / HDMF', r.pagibig));
+            rows.push(addSubtotal('Total Mandatory Deductions', r.totalMandatory));
+
+            rows.push(addSection('Taxable Income Computation'));
+            rows.push(addRow('Taxable Monthly Income', r.taxableIncome, 'row-positive'));
+
+            rows.push(addSection('Tax Deductions (BIR — TRAIN Law)'));
+            rows.push(addRow('Monthly Withholding Tax', r.withholdingTax));
+            rows.push(addRow('Annual Tax Equivalent', r.withholdingTax * 12));
+
+            document.getElementById('payslipBody').innerHTML = rows.join('');
+            document.getElementById('rsNetPay').textContent = php(r.netPay);
+
+            // ─── Annual Summary Table
+            const annualRows = [
+                ['Basic Salary',              r.monthlySalary, r.monthlySalary * 12],
+                type==='private'
+                ? ['SSS Contribution',       r.sss,           r.sss * 12]
+                : ['GSIS Contribution',      r.gsis,          r.gsis * 12],
+                ['PhilHealth',                r.philhealth,    r.philhealth * 12],
+                ['Pag-IBIG',                  r.pagibig,       r.pagibig * 12],
+                ['Total Mandatory Deductions',r.totalMandatory,r.totalMandatory * 12],
+                ['BIR Withholding Tax',       r.withholdingTax,r.withholdingTax * 12],
+                ['Total Deductions',          r.totalDeductions,r.totalDeductions * 12],
+                ['Net Pay',                   r.netPay,        r.netPay * 12],
+            ];
+            document.getElementById('annualBody').innerHTML = annualRows
+                .map(([d, m, a]) => `<tr><td>${d}</td><td>${php(m)}</td><td>${php(a)}</td></tr>`)
+                .join('');
+            document.getElementById('annualFoot').innerHTML =
+                `<tr><td><strong>Annual Take-Home Pay</strong></td><td>${php(r.netPay)}</td><td>${php(r.netPay*12)}</td></tr>`;
+
+            // ─── Show results
+            document.getElementById('result_section').style.display  = 'block';
+            document.getElementById('annual-section').style.display  = 'block';
+            document.getElementById('result_section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            document.getElementById('empName').value       = '';
+            document.getElementById('basicSalary').value   = '';
+            document.getElementById('allowances').value    = '0';
+            document.getElementById('typePrivate').checked = true;
+            document.getElementById('result_section').style.display = 'none';
+            document.getElementById('annual-section').style.display = 'none';
+        }
+
+        function newComputation() {
+            document.getElementById('result_section').style.display = 'none';
+            document.getElementById('annual-section').style.display = 'none';
+            document.getElementById('input_section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function printPayslip() { 
+            window.print(); 
+        }
+
+        function computePayroll() { 
+            computePayroll_UI(); 
+        }
+
     </script>
+
+
+
+
 </body>
 </html>
